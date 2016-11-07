@@ -6,6 +6,7 @@ import (
 	"github.com/joemahmah/DerpyWriter2/control"
 	"github.com/joemahmah/DerpyWriter2/output"
 	"github.com/joemahmah/DerpyWriter2/input"
+	"github.com/joemahmah/DerpyWriter2/tokenize"
 	"flag"
 	"io/ioutil"
 )
@@ -42,6 +43,8 @@ func main() {
 			return
 	}
 
+	tm := control.TokenizeManager{Logic: tokenize.SimpleTokenizeSpacePunctuation}
+	toParse = tm.Tokenize(toParse)
 
 	d := dict.NewDictionary(*n)
 	d.SetTokenGen(dict.WordGenerator)
