@@ -1,4 +1,4 @@
-package tokenize
+package inputFormat
 
 import "strings"
 

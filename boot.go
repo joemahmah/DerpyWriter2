@@ -5,7 +5,7 @@ import (
 	"github.com/joemahmah/DerpyWriter2/dict"
 	"github.com/joemahmah/DerpyWriter2/control"
 	"github.com/joemahmah/DerpyWriter2/output"
-	"github.com/joemahmah/DerpyWriter2/input"
+	"github.com/joemahmah/DerpyWriter2/inputFormat"
 	"github.com/joemahmah/DerpyWriter2/tokenize"
 	"flag"
 	"io/ioutil"
@@ -43,8 +43,8 @@ func main() {
 			return
 	}
 
-	tm := control.TokenizeManager{Logic: tokenize.SimpleTokenizeSpacePunctuation}
-	toParse = tm.Tokenize(toParse)
+	ifm := control.InputFormatManager{Logic: inputFormat.SimpleTokenizeSpacePunctuation}
+	toParse = ifm.Format(toParse)
 
 	d := dict.NewDictionary(*n)
 	d.SetTokenGen(dict.WordGenerator)
@@ -52,8 +52,8 @@ func main() {
 	dicts := make([]dict.Dictionary, 1)
 	dicts[0] = *d
 
-	im := control.InputManager{Dict: &dicts, Logic: input.SimpleStringInput}
-	im.ParseInput(toParse)
+	tm := control.TokenizeManager{Dict: &dicts, Logic: tokenize.SimpleStringInput}
+	tm.ParseInput(toParse)
 
 	om := control.OutputManager{Dict: &dicts, Logic: output.SimpleMarkovOrderN(*n,*outputLogic)}
 

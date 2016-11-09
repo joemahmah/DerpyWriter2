@@ -2,17 +2,17 @@ package control
 
 import "github.com/joemahmah/DerpyWriter2/dict"
 
-type TokenizeLogic func(string) string
-type InputLogic func(string, *[]dict.Dictionary)
+type InputFormatLogic func(string) string
+type TokenizeLogic func(string, *[]dict.Dictionary)
 type OutputLogic func(int, *[]dict.Dictionary)string
 
-type TokenizeManager struct {
-	Logic TokenizeLogic
+type InputFormatManager struct {
+	Logic InputFormatLogic
 }
 
-type InputManager struct {
+type TokenizeManager struct {
 	Dict *[]dict.Dictionary
-	Logic InputLogic
+	Logic TokenizeLogic
 }
 
 type OutputManager struct {
@@ -21,7 +21,8 @@ type OutputManager struct {
 }
 
 type Manager struct {
-	IM InputManager
+	IFM InputFormatManager
+	TM TokenizeManager
 	OM OutputManager
 	Dict *[]dict.Dictionary
 }
@@ -30,14 +31,14 @@ func (om *OutputManager) GenText(words int) string {
 	return om.Logic(words, om.Dict)
 }
 
-func (im *InputManager) ParseInput(input string) {
-	im.Logic(input, im.Dict)
+func (tm *TokenizeManager) ParseInput(input string) {
+	tm.Logic(input, tm.Dict)
 
-	for i := 0; i < len(*im.Dict); i++ {
-		(*im.Dict)[i].Calculate()
+	for i := 0; i < len(*tm.Dict); i++ {
+		(*tm.Dict)[i].Calculate()
 	}
 }
 
-func (tm *TokenizeManager) Tokenize(input string) string{
-	return tm.Logic(input)
+func (ifm *InputFormatManager) Format(input string) string{
+	return ifm.Logic(input)
 }

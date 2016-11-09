@@ -1,4 +1,4 @@
-package input
+package tokenize
 
 import (
 	"github.com/joemahmah/DerpyWriter2/dict"
