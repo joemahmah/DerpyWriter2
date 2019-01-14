@@ -50,8 +50,8 @@ func markovNoCanidateChange(n1canidates []string, canidates []string) []string {
 }
 
 
-//Note: Slow as fuck
-func SimpleMarkovOrderN(n int, nOrderFunc int) func(int, *[]dict.Dictionary)string{
+//Note: NOT SLOW AT ALL >_<
+func SimpleMarkovOrderN(n int, nOrderFunc int) func(int, *[]dict.Dictionary) []Sentence{
 
 	var orderFunction func([]string,[]string)[]string
 
@@ -65,22 +65,23 @@ func SimpleMarkovOrderN(n int, nOrderFunc int) func(int, *[]dict.Dictionary)stri
 			orderFunction = markovNoCanidateChange
 	}
 
-	function := func(words int, dicts *[]dict.Dictionary) string{
+	function := func(words int, dicts *[]dict.Dictionary) []Sentence{
 		dictionary := (*dicts)[0]
 
-		var output bytes.Buffer
+		var sentences []Sentence
+		var currentSentence Sentence = NewSentence()
 		var lastTokens []dict.Token = make([]dict.Token, n)
 
 		//Choose random first word
 		current := dictionary.GetRandomTokenUnweighted()
-		output.WriteString(current.AsString())
-		output.WriteString(" ")
+		currentSentence.AddWord(current.AsString())
 
 		lastTokens[0] = current
 
 		var canidates []string
 		var n1canidates []string
 
+		//Loop until all requested words are generated
 		for i := 1; i < words; i++ {
 			canidates = make([]string, 0)
 			n1canidates = make([]string, 0)
@@ -104,8 +105,13 @@ func SimpleMarkovOrderN(n int, nOrderFunc int) func(int, *[]dict.Dictionary)stri
 
 			if err == nil {
 				//Write to string
-				output.WriteString(current.AsString())
-				output.WriteString(" ")
+				if IsPunctuation(current.AsString()) {
+					currentSentence.SetPunctuation(current.AsString())
+					sentences = append(sentences, currentSentence)
+					currentSentence = NewSentence()
+				} else {
+					currentSentence.AddWord(current.AsString())
+				}
 
 				//Cycle last tokens
 				for j := 0; j < n-1; j++ {
@@ -117,14 +123,14 @@ func SimpleMarkovOrderN(n int, nOrderFunc int) func(int, *[]dict.Dictionary)stri
 			}
 		}
 
-		return output.String()
+		return sentences
 	}
 
 	return function
 }
 
 //Only uses first dictionary; only uses 1 back for markov chain
-func SimpleMarkov(words int, dicts *[]dict.Dictionary) string {
+func SimpleMarkov(words int, dicts *[]dict.Dictionary) []Sentence {
 	return SimpleMarkovOrderN(1, 0)(words, dicts)
 }
 

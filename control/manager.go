@@ -1,10 +1,13 @@
 package control
 
-import "github.com/joemahmah/DerpyWriter2/dict"
+import (
+	"github.com/joemahmah/DerpyWriter2/dict"
+	"github.com/joemahmah/DerpyWriter2/output"
+)
 
 type InputFormatLogic func(string) string
 type TokenizeLogic func(string, *[]dict.Dictionary)
-type OutputLogic func(int, *[]dict.Dictionary)string
+type OutputLogic func(int, *[]dict.Dictionary) []output.Sentence
 
 type InputFormatManager struct {
 	Logic InputFormatLogic
@@ -27,7 +30,7 @@ type Manager struct {
 	Dict *[]dict.Dictionary
 }
 
-func (om *OutputManager) GenText(words int) string {
+func (om *OutputManager) GenText(words int) []output.Sentence {
 	return om.Logic(words, om.Dict)
 }
 

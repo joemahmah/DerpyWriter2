@@ -17,46 +17,38 @@ func main() {
 	outputLogic := flag.Int("ol",2,"Selects which logic to use when generating output. See documentation for list.")
 	n := flag.Int("n",1,"IO depth.")
 
-	inputType := flag.Int("it",2,"Determine where input is read from (0 stdin, 1 arg, 2 file).")
-
 	flag.Parse()
 
 	args := flag.Args()
 
+	inputFormatManager := control.InputFormatManager{Logic: inputFormat.SimpleTokenizeSpacePunctuation}
 
-	var toParse string
+	baseDictionary := dict.NewDictionary(*n)
+	baseDictionary.SetTokenGen(dict.WordGenerator)
 
-	switch *inputType {
-		case 0:
-			fmt.Println("Not yet implemented!")
-			return
-		case 1:
-			toParse = args[0]
-		case 2:
-			contents, err := ioutil.ReadFile(args[0])
-			if err != nil {
-				panic(err)
-			}
-			toParse = string(contents)
-		default:
-			fmt.Println("Invalid input type!")
-			return
+	//DW2 is implemented to use multiple dictionaries
+	//We need to assign the actual dictionary to the dictionary manager
+	dictionaries := make([]dict.Dictionary, 1)
+	dictionaries[0] = *baseDictionary
+
+	tokenizeManager := control.TokenizeManager{Dict: &dictionaries, Logic: tokenize.SimpleStringInput}
+
+	//Read through all the files
+	for fileIdx := 0; fileIdx < len(args); fileIdx++ {
+		contents, err := ioutil.ReadFile(args[0])
+		if err != nil {
+			panic(err)
+		}
+		toParse := inputFormatManager.Format(string(contents))
+
+		tokenizeManager.ParseInput(toParse)
 	}
 
-	ifm := control.InputFormatManager{Logic: inputFormat.SimpleTokenizeSpacePunctuation}
-	toParse = ifm.Format(toParse)
+	//Create the output manager
+	outputManager := control.OutputManager{Dict: &dictionaries, Logic: output.SimpleMarkovOrderN(*n,*outputLogic)}
 
-	d := dict.NewDictionary(*n)
-	d.SetTokenGen(dict.WordGenerator)
-
-	dicts := make([]dict.Dictionary, 1)
-	dicts[0] = *d
-
-	tm := control.TokenizeManager{Dict: &dicts, Logic: tokenize.SimpleStringInput}
-	tm.ParseInput(toParse)
-
-	om := control.OutputManager{Dict: &dicts, Logic: output.SimpleMarkovOrderN(*n,*outputLogic)}
-
-	fmt.Println(om.GenText(*lenVal))
+	//Print output
+	sentenceOutput := outputManager.GenText(*lenVal)
+	fmt.Println(output.FormatPlain(sentenceOutput))
 
 }
